@@ -1,0 +1,131 @@
+---
+title: "Data Wrangling Exercise 3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## UCI Data Set
+
+30 subjects performed 6 different activities while wearing a smartphone on their waist.
+
+Subjects were split into 2 groups: 9 were assigned to a 'test' group; 21 to a 'train' group.
+
+The smartphone captured 3 linear acceleration and 3 angular velocity measurements during each of the 6 activities.
+
+Using the recorded measurements, 561 features of each activity were created.
+
+## Data Structure and Organization
+
+9 files of measurements for both the 'test' group and the 'train' group can be found within sub-folders labeled "Inertial Signals".
+
+3 files are contained in each of the 'test' and 'train folders':
+
+1. subject_test/subject_train: a single column of numbers between 1 and 30 identifying the subject, corresponding to the rows of data in the other 2 files 
+2. Y_test/Y_train: a single column of numbers between 1 and 6 identifying the activity, corresponding to the rows of data in the other 2 files 
+3. X_test/X_train: 561 columns of data representing the 561 features created using the smartphone measurements, corresponding to the rows of data in the other 2 files 
+
+2 further files are provided as reference:
+
+1. activity_labels: a file indicating which activity number corresponds to which activity
+2. features: the names of the 561 features created using the smartphoe measurements
+
+## Data Wrangling
+
+### Merge the Test and Train data sets to create one data set
+
+Top begin, the dplyr package was called:
+
+```{r}
+library(dplyr)
+```
+
+Column name variables were created to be used when loading the Test and Train data sets:
+
+
+```{r}
+subject_id <- "SubjectID"
+activity_number <- "ActivityLabel"
+features <- read.table("features.txt")
+features_names <- features$V2
+```
+
+Next, the 3 Test files were loaded into 3 data frames:
+
+```{r}
+subject_test <- read.table("subject_test.txt", col.names = subject_id)
+y_test <- read.table("y_test.txt", col.names = activity_number)
+x_test <- read.table("X_test.txt", col.names = features_names)
+```
+
+These 3 data frames were then combined into a single *test* data frame:
+```{r}
+test <- bind_cols(subject_test, y_test, x_test)
+```
+
+These steps were repeated for the Train files to create a single *train* data frame:
+```{r}
+subject_train <- read.table("subject_train.txt", col.names = subject_id)
+y_train <- read.table("y_train.txt", col.names = activity_number)
+x_train <- read.table("X_train.txt", col.names = features_names)
+train <- bind_cols(subject_train, y_train, x_train)
+```
+
+Finally, the Test and Train data frames were combined into a single data frame called *results*:
+```{r}
+results <- bind_rows(test, train)
+```
+
+### Extract Columns Containing Mean and Standard Deviation
+Create a new data frame called *mean_std* by selecting columns from the *results* data frame with names containing *SubjectID*, *ActivityLabel*, *mean*, and *std*
+
+```{r}
+mean_std <- select(results, contains("SubjectID"), contains("ActivityLabel"), 
+       contains("mean"), contains("std"))
+```
+
+### Create Variables ActivityLabel and Activity Name
+
+Load the activity labels file into a data frame to allow it to be merged with the *mean_std* data frame created in the previous step
+```{r}
+activity_labels <- read.table("activity_labels.txt", 
+                              col.names = c("ActivityLabel", "ActivityName"))
+```
+
+
+Merge the *mean_std* data frame with the *activity_labels* data frame by the *ActivityLabel* column
+```{r}
+mean_std <- merge(mean_std, activity_labels, by = "ActivityLabel") 
+```
+
+### Create a Final Tidy Data Set with the Average of Each Variable for Each Activity and Each Subject
+
+Create an empty data frame called *activity* to pass calculated values to:
+```{r}
+activity <- data.frame()
+```
+
+Create a loop to select values for each activity and subject, then find mean for each value.
+The *ActivityLabel* variable had to be removed for the *mean* function to work (this was added back in later). A new row was added to the *activity* data frame for each activity/subject mean value:
+Create an empty data frame called *activity* to pass calculated values to:
+```{r}
+for(m in 1:6) {
+for(n in 1:30) {
+   activity <- rbind(activity, summarise_each(filter(mean_std, ActivityLabel == m, SubjectID == n), 
+                                    funs(mean), ActivityLabel:fBodyBodyGyroJerkMag.std..))
+}
+}
+```
+
+The *ActivityLabel* variable was added back into the *activity* data frame in the same manner as used previously:
+Create an empty data frame called *activity* to pass calculated values to:
+```{r}
+activity <- merge(activity, activity_labels, by = "ActivityLabel")
+```
+
+Finally, the *activity* data frame was written to a csv file: 
+```{r}
+write.csv(activity, file = "wrangling3.csv")
+```
