@@ -140,14 +140,6 @@ $(document).ready(function () {
 <h3>Merge the Test and Train data sets to create one data set</h3>
 <p>Top begin, the dplyr package was called:</p>
 <pre class="r"><code>library(dplyr)</code></pre>
-<pre><code>## 
-## Attaching package: 'dplyr'</code></pre>
-<pre><code>## The following objects are masked from 'package:stats':
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union</code></pre>
 <p>Column name variables were created to be used when loading the Test and Train data sets:</p>
 <pre class="r"><code>subject_id &lt;- &quot;SubjectID&quot;
 activity_number &lt;- &quot;ActivityLabel&quot;
@@ -158,20 +150,68 @@ features_names &lt;- features$V2</code></pre>
 y_test &lt;- read.table(&quot;y_test.txt&quot;, col.names = activity_number)
 x_test &lt;- read.table(&quot;X_test.txt&quot;, col.names = features_names)</code></pre>
 <p>These 3 data frames were then combined into a single <em>test</em> data frame:</p>
-<pre class="r"><code>test &lt;- bind_cols(subject_test, y_test, x_test)</code></pre>
+<pre class="r"><code>test &lt;- bind_cols(subject_test, y_test, x_test)
+test[1:6, 1:6]</code></pre>
+<pre><code>## Source: local data frame [6 x 6]
+## 
+##   SubjectID ActivityLabel tBodyAcc.mean...X tBodyAcc.mean...Y
+##       (int)         (int)             (dbl)             (dbl)
+## 1         2             5         0.2571778       -0.02328523
+## 2         2             5         0.2860267       -0.01316336
+## 3         2             5         0.2754848       -0.02605042
+## 4         2             5         0.2702982       -0.03261387
+## 5         2             5         0.2748330       -0.02784779
+## 6         2             5         0.2792199       -0.01862040
+## Variables not shown: tBodyAcc.mean...Z (dbl), tBodyAcc.std...X (dbl)</code></pre>
 <p>These steps were repeated for the Train files to create a single <em>train</em> data frame:</p>
 <pre class="r"><code>subject_train &lt;- read.table(&quot;subject_train.txt&quot;, col.names = subject_id)
 y_train &lt;- read.table(&quot;y_train.txt&quot;, col.names = activity_number)
 x_train &lt;- read.table(&quot;X_train.txt&quot;, col.names = features_names)
-train &lt;- bind_cols(subject_train, y_train, x_train)</code></pre>
+train &lt;- bind_cols(subject_train, y_train, x_train)
+train[1:6, 1:6]</code></pre>
+<pre><code>## Source: local data frame [6 x 6]
+## 
+##   SubjectID ActivityLabel tBodyAcc.mean...X tBodyAcc.mean...Y
+##       (int)         (int)             (dbl)             (dbl)
+## 1         1             5         0.2885845       -0.02029417
+## 2         1             5         0.2784188       -0.01641057
+## 3         1             5         0.2796531       -0.01946716
+## 4         1             5         0.2791739       -0.02620065
+## 5         1             5         0.2766288       -0.01656965
+## 6         1             5         0.2771988       -0.01009785
+## Variables not shown: tBodyAcc.mean...Z (dbl), tBodyAcc.std...X (dbl)</code></pre>
 <p>Finally, the Test and Train data frames were combined into a single data frame called <em>results</em>:</p>
-<pre class="r"><code>results &lt;- bind_rows(test, train)</code></pre>
+<pre class="r"><code>results &lt;- bind_rows(test, train)
+results[1:6, 1:6]</code></pre>
+<pre><code>## Source: local data frame [6 x 6]
+## 
+##   SubjectID ActivityLabel tBodyAcc.mean...X tBodyAcc.mean...Y
+##       (int)         (int)             (dbl)             (dbl)
+## 1         2             5         0.2571778       -0.02328523
+## 2         2             5         0.2860267       -0.01316336
+## 3         2             5         0.2754848       -0.02605042
+## 4         2             5         0.2702982       -0.03261387
+## 5         2             5         0.2748330       -0.02784779
+## 6         2             5         0.2792199       -0.01862040
+## Variables not shown: tBodyAcc.mean...Z (dbl), tBodyAcc.std...X (dbl)</code></pre>
 </div>
 <div id="extract-columns-containing-mean-and-standard-deviation" class="section level3">
 <h3>Extract Columns Containing Mean and Standard Deviation</h3>
 <p>Create a new data frame called <em>mean_std</em> by selecting columns from the <em>results</em> data frame with names containing <em>SubjectID</em>, <em>ActivityLabel</em>, <em>mean</em>, and <em>std</em></p>
 <pre class="r"><code>mean_std &lt;- select(results, contains(&quot;SubjectID&quot;), contains(&quot;ActivityLabel&quot;), 
-       contains(&quot;mean&quot;), contains(&quot;std&quot;))</code></pre>
+       contains(&quot;mean&quot;), contains(&quot;std&quot;))
+mean_std[1:6, 1:6]</code></pre>
+<pre><code>## Source: local data frame [6 x 6]
+## 
+##   SubjectID ActivityLabel tBodyAcc.mean...X tBodyAcc.mean...Y
+##       (int)         (int)             (dbl)             (dbl)
+## 1         2             5         0.2571778       -0.02328523
+## 2         2             5         0.2860267       -0.01316336
+## 3         2             5         0.2754848       -0.02605042
+## 4         2             5         0.2702982       -0.03261387
+## 5         2             5         0.2748330       -0.02784779
+## 6         2             5         0.2792199       -0.01862040
+## Variables not shown: tBodyAcc.mean...Z (dbl), tGravityAcc.mean...X (dbl)</code></pre>
 </div>
 <div id="create-variables-activitylabel-and-activity-name" class="section level3">
 <h3>Create Variables ActivityLabel and Activity Name</h3>
@@ -179,7 +219,30 @@ train &lt;- bind_cols(subject_train, y_train, x_train)</code></pre>
 <pre class="r"><code>activity_labels &lt;- read.table(&quot;activity_labels.txt&quot;, 
                               col.names = c(&quot;ActivityLabel&quot;, &quot;ActivityName&quot;))</code></pre>
 <p>Merge the <em>mean_std</em> data frame with the <em>activity_labels</em> data frame by the <em>ActivityLabel</em> column</p>
-<pre class="r"><code>mean_std &lt;- merge(mean_std, activity_labels, by = &quot;ActivityLabel&quot;) </code></pre>
+<pre class="r"><code>mean_std &lt;- merge(mean_std, activity_labels, by = &quot;ActivityLabel&quot;)
+mean_std[1:6, 1:4]</code></pre>
+<pre><code>##   ActivityLabel SubjectID tBodyAcc.mean...X tBodyAcc.mean...Y
+## 1             1         7         0.2693013       0.007891765
+## 2             1        21         0.2623422      -0.016215306
+## 3             1         7         0.2383207       0.002102952
+## 4             1         7         0.2447143      -0.031546655
+## 5             1        18         0.2490386      -0.021118537
+## 6             1         7         0.2046162      -0.067271336</code></pre>
+<pre class="r"><code>mean_std[1:6, 86:89]</code></pre>
+<pre><code>##   fBodyBodyAccJerkMag.std.. fBodyBodyGyroMag.std..
+## 1                0.07806475             -0.2867137
+## 2               -0.05827965             -0.4939453
+## 3               -0.06801571             -0.3326593
+## 4                0.06800522             -0.2575269
+## 5               -0.43107747             -0.6901822
+## 6               -0.17514419             -0.3764196
+##   fBodyBodyGyroJerkMag.std.. ActivityName
+## 1                 0.13829929      WALKING
+## 2                -0.39287799      WALKING
+## 3                -0.02481624      WALKING
+## 4                 0.09164432      WALKING
+## 5                -0.75909639      WALKING
+## 6                -0.19549556      WALKING</code></pre>
 </div>
 <div id="create-a-final-tidy-data-set-with-the-average-of-each-variable-for-each-activity-and-each-subject" class="section level3">
 <h3>Create a Final Tidy Data Set with the Average of Each Variable for Each Activity and Each Subject</h3>
@@ -191,9 +254,39 @@ for(n in 1:30) {
    activity &lt;- rbind(activity, summarise_each(filter(mean_std, ActivityLabel == m, SubjectID == n), 
                                     funs(mean), ActivityLabel:fBodyBodyGyroJerkMag.std..))
 }
-}</code></pre>
+}
+activity[1:6, 1:6]</code></pre>
+<pre><code>##   ActivityLabel SubjectID tBodyAcc.mean...X tBodyAcc.mean...Y
+## 1             1         1         0.2773308       -0.01738382
+## 2             1         2         0.2764266       -0.01859492
+## 3             1         3         0.2755675       -0.01717678
+## 4             1         4         0.2785820       -0.01483995
+## 5             1         5         0.2778423       -0.01728503
+## 6             1         6         0.2836589       -0.01689542
+##   tBodyAcc.mean...Z tGravityAcc.mean...X
+## 1        -0.1111481            0.9352232
+## 2        -0.1055004            0.9130173
+## 3        -0.1126749            0.9365067
+## 4        -0.1114031            0.9639997
+## 5        -0.1077418            0.9726250
+## 6        -0.1103032            0.9580675</code></pre>
 <p>The <em>ActivityLabel</em> variable was added back into the <em>activity</em> data frame in the same manner as used previously: Create an empty data frame called <em>activity</em> to pass calculated values to:</p>
-<pre class="r"><code>activity &lt;- merge(activity, activity_labels, by = &quot;ActivityLabel&quot;)</code></pre>
+<pre class="r"><code>activity &lt;- merge(activity, activity_labels, by = &quot;ActivityLabel&quot;)
+activity[1:6, 84:89]</code></pre>
+<pre><code>##   fBodyGyro.std...Z fBodyAccMag.std.. fBodyBodyAccJerkMag.std..
+## 1        -0.4365622        -0.3980326               -0.10349240
+## 2        -0.5598566        -0.5771052               -0.16409197
+## 3        -0.5458964        -0.4563731               -0.08985199
+## 4        -0.7164585        -0.6511726               -0.32045870
+## 5        -0.4203671        -0.5196369               -0.30568538
+## 6        -0.5122092        -0.4216831               -0.09649997
+##   fBodyBodyGyroMag.std.. fBodyBodyGyroJerkMag.std.. ActivityName
+## 1             -0.3210180                 -0.3816019      WALKING
+## 2             -0.6517928                 -0.5581046      WALKING
+## 3             -0.6326433                 -0.5490870      WALKING
+## 4             -0.5939372                 -0.7577681      WALKING
+## 5             -0.5897415                 -0.4556653      WALKING
+## 6             -0.5106483                 -0.4080789      WALKING</code></pre>
 <p>Finally, the <em>activity</em> data frame was written to a csv file:</p>
 <pre class="r"><code>write.csv(activity, file = &quot;wrangling3.csv&quot;)</code></pre>
 </div>
